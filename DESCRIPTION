@@ -1,0 +1,24 @@
+Package: gpsr
+Title: Manipulating Genetic Programming for Symbolic Regression
+Version: 0.0.0.9000
+Authors@R: 
+    person(
+    given = "Haoran", 
+    family = "Zhang", 
+    email = "haoran.zhang24@imperial.ac.uk", 
+    role = c("aut", "cre"))
+Description: An R package for symbolic regression using genetic programming. This contains
+    several R6 classes, and allows the user to customize the fitness function and operator 
+    functions to extend the program.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    R6
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
