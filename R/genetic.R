@@ -23,6 +23,8 @@ SymbolicRegressor <- R6Class(
     const_range = NULL,
     #' @field init_depth The range of tree depths for the initial population of naive formulas.
     init_depth = NULL,
+    #' @field init_method The method define how the tree grows.
+    init_method = NULL,
     #' @field function_set A list of valid functions in list form to use in the program.
     function_set = NULL,
     #' @field metric The raw fitness metric.
@@ -60,6 +62,7 @@ SymbolicRegressor <- R6Class(
     #' @param tournament_size The field tournament_size.
     #' @param const_range The field const_range.
     #' @param init_depth The field init_depth.
+    #' @param init_method The field init_method.
     #' @param function_set The field function_set.
     #' @param metric The field metric.
     #' @param parsimony_coefficient The field parsimony_coefficient.
@@ -76,6 +79,7 @@ SymbolicRegressor <- R6Class(
                           tournament_size = 20,
                           const_range = c(-1,1),
                           init_depth = c(2:6),
+                          init_method = "half and half",
                           function_set = list("add", "sub", "mul", "div"),
                           metric = "mse",
                           parsimony_coefficient = 1e-3,
@@ -119,6 +123,12 @@ SymbolicRegressor <- R6Class(
         stop(paste("The init_depth parameter expects numeric value. Got type:", class(init_depth)))
       } else if (sum(is.na(init_depth)) > 0) {
         stop("The init_depth parameter contains NA.")
+      }
+
+      if (!is.character(init_method)) {
+        stop(paste("The init_method parameter expects character value. Got type:", class(init_method)))
+      } else if (!(init_method %in% c("half and half","grow","full"))) {
+        stop("Unknown init_method.")
       }
 
       if (!is.numeric(parsimony_coefficient)) {
@@ -187,6 +197,7 @@ SymbolicRegressor <- R6Class(
         stop("Got unknown fitness.")
       }
       self$init_depth <- init_depth
+      self$init_method <- init_method
       self$pop_size <- pop_size
       self$tournament_size <- tournament_size
       self$generations <- generations
@@ -259,6 +270,7 @@ SymbolicRegressor <- R6Class(
           function_set = self$function_set,
           feature_names = self$feature_names,
           init_depth = self$init_depth,
+          init_method = self$init_method,
           p_point_replace = self$p_point_replace,
           parsimony_coefficient = self$parsimony_coefficient,
           const_range = self$const_range,

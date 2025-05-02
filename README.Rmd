@@ -26,9 +26,9 @@ You can install the development version of gpsr like so:
 
 ``` r
 # use remotes 
-remotes::install_github("yourname/mypackage")
+remotes::install_github("Haoran-Zhang-ic/Genetic-Programming-Symbolic-Regression")
 # or use devtools
-devtools::install_github("yourname/mypackage")
+devtools::install_github("Haoran-Zhang-ic/Genetic-Programming-Symbolic-Regression")
 ```
 
 ## Example
@@ -41,8 +41,8 @@ library(gpsr)
 set.seed(0)
 # randomly generate samples
 data <- matrix(runif(100, -1, 1), nrow = 50, ncol = 2)
-# our target formula: X1^2 - X2^2 - X1 - 1
-y <- data[, 1]**2 - data[, 2]**2 - data[, 1] - 1
+# our target formula: X1^2 - X2^2 + X1 - 1
+y <- data[, 1]**2 - data[, 2]**2 + data[, 1] - 1
 sr <- SymbolicRegressor$new(
   pop_size = 2000,
   generations = 10,
@@ -59,8 +59,8 @@ sr$fit(data, y)
 paste("Best program:",sr$best_program$tree_expression())
 ```
 
-Our target formula is: $y = X_1^2 - X_2^2 - X_1 - 1$.
+Our target formula is: $y = X_1^2 - X_2^2 + X_1 - 1$.
 
-The best expression we get is $y = (X_1^2 + (-0.961 - X_1)) - X_2^2$.
+The best expression we get is $y = (X_1 - 0.974) - (X_2^2 - X_1^2)$.
 
-After reform our expression $y = X_1^2 - X_2^2 - X_1 - 0.961$, we (almost) find the formula we are looking for! 
+After reform our expression $y = X_1^2 - X_2^2 + X_1 - 0.974$, we (almost) find the formula we are looking for! 

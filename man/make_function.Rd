@@ -34,5 +34,5 @@ my_customized_function <- make_function(
   param_pool = list(c(1, 2, 3), c(4, 5, 6))
 )
 # check the function return the correct number
-my_customized_function$fun(5,2,3)
+my_customized_function$fun(5, 2, 3)
 }

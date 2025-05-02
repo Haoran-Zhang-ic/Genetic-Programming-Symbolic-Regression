@@ -24,6 +24,8 @@ A regressor can fit the target values.
 
 \item{\code{init_depth}}{The range of tree depths for the initial population of naive formulas.}
 
+\item{\code{init_method}}{The method define how the tree grows.}
+
 \item{\code{function_set}}{A list of valid functions in list form to use in the program.}
 
 \item{\code{metric}}{The raw fitness metric.}
@@ -76,6 +78,7 @@ Start a new regressor object.
   tournament_size = 20,
   const_range = c(-1, 1),
   init_depth = c(2:6),
+  init_method = "half and half",
   function_set = list("add", "sub", "mul", "div"),
   metric = "mse",
   parsimony_coefficient = 0.001,
@@ -99,6 +102,8 @@ Start a new regressor object.
 \item{\code{const_range}}{The field const_range.}
 
 \item{\code{init_depth}}{The field init_depth.}
+
+\item{\code{init_method}}{The field init_method.}
 
 \item{\code{function_set}}{The field function_set.}
 

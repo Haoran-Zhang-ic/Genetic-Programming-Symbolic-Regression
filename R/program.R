@@ -12,6 +12,8 @@ Program <- R6Class(
   public = list(
     #' @field init_depth The range of tree depths for the initial population of naive formulas.
     init_depth = NULL,
+    #' @field init_method The method define how the tree grows.
+    init_method = NULL,
     #' @field function_set A list of valid functions in list form to use in the program.
     function_set = NULL,
     #' @field const_range The range of constant can take for the program.
@@ -35,6 +37,7 @@ Program <- R6Class(
     #'
     #' @param function_set The field function_set
     #' @param init_depth The field init_depth
+    #' @param init_method The field init_method
     #' @param feature_names The field feature_names
     #' @param const_range The field const_range
     #' @param metric The field metric
@@ -45,6 +48,7 @@ Program <- R6Class(
     #' @return The program object
     initialize = function(function_set = NULL,
                           init_depth = NULL,
+                          init_method = NULL,
                           feature_names = NULL,
                           const_range = NULL,
                           metric = NULL,
@@ -53,6 +57,7 @@ Program <- R6Class(
                           program = NULL) {
       self$function_set <- function_set
       self$init_depth <- init_depth
+      self$init_method <- init_method
       self$feature_names <- feature_names
       self$const_range <- const_range
       self$metric <- metric
@@ -70,6 +75,11 @@ Program <- R6Class(
     #'
     #' @return a raw program in list form.
     build_program = function() {
+      if (self$init_method == "half and half"){
+        method = ifelse(round(runif(1),0),"full","grow")
+      }else{
+        method = self$init_method
+      }
       max_depth <- sample(self$init_depth, size = 1)
       # Start a program with a function to avoid degenerative programs
       init_function <- sample(names(self$function_set), size = 1)
@@ -81,7 +91,8 @@ Program <- R6Class(
         depth <- length(terminal_stack)
         choice <- sample(c(names(self$function_set), self$feature_names), size = 1)
         # Determine if we are adding a function or terminal
-        if (depth < max_depth & choice %in% names(self$function_set)) {
+        if (depth < max_depth && (choice %in% names(self$function_set) || method == "full")) {
+          choice <- sample(names(self$function_set), size = 1)
           program <- append(program, choice)
           terminal_stack <- append(terminal_stack, self$function_set[[choice]]$arity)
           param_stack <- append(param_stack, self$function_set[[choice]]$param)

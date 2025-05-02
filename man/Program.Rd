@@ -14,6 +14,8 @@ Object used by the SymbolicRegressor.
 \describe{
 \item{\code{init_depth}}{The range of tree depths for the initial population of naive formulas.}
 
+\item{\code{init_method}}{The method define how the tree grows.}
+
 \item{\code{function_set}}{A list of valid functions in list form to use in the program.}
 
 \item{\code{const_range}}{The range of constant can take for the program.}
@@ -62,6 +64,7 @@ Initialize method}
 \if{html}{\out{<div class="r">}}\preformatted{Program$new(
   function_set = NULL,
   init_depth = NULL,
+  init_method = NULL,
   feature_names = NULL,
   const_range = NULL,
   metric = NULL,
@@ -77,6 +80,8 @@ Initialize method}
 \item{\code{function_set}}{The field function_set}
 
 \item{\code{init_depth}}{The field init_depth}
+
+\item{\code{init_method}}{The field init_method}
 
 \item{\code{feature_names}}{The field feature_names}
 

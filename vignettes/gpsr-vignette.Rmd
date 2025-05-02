@@ -46,6 +46,16 @@ The gpsr regressor starts with building a number of naive programs/formulas, and
 
   The range of tree depths for the initial population of naive formulas.
   
+* init_method character, optional (default = "half and half")
+
+  The method define how the tree grows.
+  
+  "grow": Randomly select terminals or functions.
+  
+  "full": Functions are chosen unitl the tree reaches the maximum depth.
+  
+  "half and half": Trees are grown through a 50/50 mix of 'full' and 'grow'.
+  
 * function_set list, optional (default = list("add", "sub", "mul", "div"))
 
   A list of valid functions in list form to use in the program.
