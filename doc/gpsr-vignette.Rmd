@@ -1,0 +1,218 @@
+---
+title: "gpsr-vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{gpsr-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(gpsr)
+```
+
+## Symbolic Regressor
+
+A Genetic Programming symbolic regressor.
+
+The gpsr regressor starts with building a number of naive programs/formulas, and compute their defined fitness. In the following evolution process, the parent program(and donor program) will be selected from a group of programs of previous generation accroding to their fitness to perform randomly selected crossover operation or mutation operation. The algorithm will search the fittest program until it meets stop condition.
+
+### Parameters 
+
+* pop_size numeric, optional (default = 2000)
+
+  The number of programs in each generation.
+  
+* generations numeric, optional (default = 20)
+
+  The number of generations to evolve.
+  
+* tournament_size numeric, optional (default = 20)
+
+  The number of programs that will compete to become part of the next generation.
+  
+* const_range numeric of two number, optional (default = c(-1,1))
+
+  The range of constant can take for the program.
+  
+* init_depth numeric of several integers, optional (default = c(2:6))
+
+  The range of tree depths for the initial population of naive formulas.
+  
+* init_method character, optional (default = "half and half")
+
+  The method define how the tree grows.
+  
+  "grow": Randomly select terminals or functions.
+  
+  "full": Functions are chosen unitl the tree reaches the maximum depth.
+  
+  "half and half": Trees are grown through a 50/50 mix of 'full' and 'grow'.
+  
+* function_set list, optional (default = list("add", "sub", "mul", "div"))
+
+  A list of valid functions in list form to use in the program.
+  
+* metric string or list, optional (default = "mse")
+
+  The raw fitness metric.
+  
+* parsimony_coefficient numeric, optional (default = 1e-3)
+
+  The constant penalizes large programs by adjusting their fitness to be less favorable for selection.
+  
+* p_crossover numeric, optional (default = 0.7)
+
+  The probability of performing crossover on a tournament winner.
+  
+* p_subtree_mutation numeric, optional (default = 0.1)
+
+  The probability of performing subtree mutation on a tournament winner.
+  
+* p_hoist_mutation numeric, optional (default = 0.05)
+
+  The probability of performing hoist mutation on a tournament winner.
+  
+* p_point_mutation numeric, optional (default = 0.1)
+
+  The probability of performing point mutation on a tournament winner.
+  
+* p_point_replace numeric, optional (default = 0.05)
+
+  The probability that any given node will be mutated during point mutation.
+  
+### Attributes
+
+* best_program list 
+
+  The flattened tree representation of the best program.
+
+* feature_names character 
+
+  The vector of names of features of input data.
+  
+* method_probs numeric 
+
+  The probabilities to perform the crossover or mutations. 
+
+* programs list
+
+  All the programs.
+  
+* fitness numeric
+
+  All the fitness.
+  
+## Advanced Use
+
+### Custom functions
+
+The gpsr allows users to custom the functions they want to apply in the algorithm by using the make_function.
+
+Firstly, you need to define your own function. It should return the same shape as the input vectors after operation. Also, it is supposed to be closed under zero and negative values.
+
+For this example, we will define a simple function called squared_sum $y = (a+b)^2$, it computes the sum of two vectors, and return the squared sum vector.
+
+```{r}
+.perf_sqr = function(a,b){
+  return((a+b)^2)
+}
+```
+
+To make this into a compatible gpsr function, we will use the make_function. We need to assign the arity of the function which is the total number of arguments it takes and the name of the function you defined.
+
+```{r}
+perf_sqr = make_function(
+  fun = .perf_sqr, 
+  arity = 2, 
+  name = "perfect_square")
+# test the function
+perf_sqr$fun(c(1,2,3),c(2,3,4))
+```
+
+This can be added to the gpsr regressor as below.
+
+```{r}
+gpsr_es = SymbolicRegressor$new(function_set = list("add","sub","div","mul",perf_sqr))
+# check function names
+for (i in 1:length(gpsr_es$function_set)){
+  cat(gpsr_es$function_set[[i]]$name," ")
+}
+```
+
+Great! We set our first simple function now.
+
+The gpsr also allows user to define a function with changeable parameters.
+
+Suppose we want to define a function like $z = a(x+y)^2 + b$, we have four arguments and two parameters we want to make it changeable here.
+
+Then we can define the function as below.
+
+```{r}
+.perf_sqr_plus = function(x,y,a,b){
+  return(a*(x+y)^2 + b)
+}
+```
+
+Then we need to use the make_function again. At this time, we have four arguments, then we have $arity = 4$. And two of them are changeable, then we set $param = 2$. We also need to set the limitation for these changeable paramters by defining a list of ordered numeric vector of the choices of parameter can take.  
+
+```{r}
+perf_sqr_plus = make_function(
+  fun = .perf_sqr_plus, 
+  arity = 4, 
+  name = "perfect_square_plus",
+  param = 2,
+  param_pool = list(c(1,2,3),c(2,3,4)))
+# test the function
+perf_sqr_plus$fun(c(1,2,3),c(2,3,4),2,3)
+```
+
+Then add it to the gpsr estimator.
+
+```{r}
+gpsr_es = SymbolicRegressor$new(function_set = list("add","sub","div","mul",perf_sqr,perf_sqr_plus))
+# check function names
+for (i in 1:length(gpsr_es$function_set)){
+  cat(gpsr_es$function_set[[i]]$name," ")
+}
+```
+
+Nice! Now we have one more available function with two changeable parameters.
+
+### Custom fitness
+
+In gpsr, you can also feel free to custom your fitness function. This is done using the make_fitness function.  
+
+For instance, if you want to use the RMSE metric $RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^n(y_i - \hat{y_i})^2}$. Then you can define this metric as below.
+
+```{r}
+.rmse = function(y,y_hat){
+  return(sqrt(mean((y-y_hat)^2)))
+}
+```
+
+We then create a fitness measure for use in our evolution by using the make_fitness function as follows:
+
+```{r}
+rmse = make_fitness(function_ = .rmse, greater_is_better = FALSE)
+# check rmse function
+rmse$function_(c(1,2,3),c(2,3,4))
+```
+
+Now we can specify our RMSE function in our estimator.
+
+```{r}
+gpsr_es = SymbolicRegressor$new(
+  function_set = list("add","sub","div","mul",perf_sqr,perf_sqr_plus),
+  metric = rmse)
+gpsr_es$metric
+```
+
+Now. We can use our customized functions and fitness function!
