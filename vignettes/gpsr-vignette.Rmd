@@ -161,7 +161,7 @@ Then we can define the function as below.
 }
 ```
 
-Then we need to use the make_function again. At this time, we have four arguments, then we have $arity = 4$. And two of them are changeable, then we set $param = 2$. We also need to set the limitation for these changeable paramters by defining a list of ordered numeric vector of the choices of parameter can take.  
+Then we need to use the make_function again. At this time, we have four arguments, then we have $arity = 4$. And two of them are changeable, then we set $param = 2$. We also need to set the limitation for these changeable parameters by defining a list of ordered numeric vector in character form of the choices of parameter can take.  
 
 ```{r}
 perf_sqr_plus = make_function(
@@ -169,9 +169,11 @@ perf_sqr_plus = make_function(
   arity = 4, 
   name = "perfect_square_plus",
   param = 2,
-  param_pool = list(c(1,2,3),c(2,3,4)))
+  param_pool = list(c('1','2','3'),c('2','3','4')))
 # test the function
-perf_sqr_plus$fun(c(1,2,3),c(2,3,4),2,3)
+# note that the character param would be automatically 
+# transform to numeric in our algorithm
+perf_sqr_plus$fun(c(1,2,3),c(2,3,4),as.numeric('2'),as.numeric('3'))
 ```
 
 Then add it to the gpsr estimator.

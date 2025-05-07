@@ -31,8 +31,8 @@ my_customized_function <- make_function(
   name = "My first function",
   arity = 3,
   param = 2,
-  param_pool = list(c(1, 2, 3), c(4, 5, 6))
+  param_pool = list(c('1', '2', '3'), c('4', '5', '6'))
 )
 # check the function return the correct number
-my_customized_function$fun(5, 2, 3)
+my_customized_function$fun(5, as.numeric('2'), as.numeric('5'))
 }

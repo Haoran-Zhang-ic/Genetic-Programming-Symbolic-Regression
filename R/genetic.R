@@ -113,8 +113,8 @@ SymbolicRegressor <- R6Class(
         stop("The generations parameter is NA or negative.")
       }
 
-      if (!is.numeric(const_range)) {
-        stop(paste("The const_range parameter expects numeric value. Got type:", class(const_range)))
+      if (!is.numeric(const_range) && !is.null(const_range)) {
+        stop(paste("The const_range parameter expects numeric or null value. Got type:", class(const_range)))
       } else if (sum(is.na(const_range)) > 0) {
         stop("The const_range parameter contains NA.")
       }

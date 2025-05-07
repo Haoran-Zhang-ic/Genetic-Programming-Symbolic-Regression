@@ -163,17 +163,18 @@ Program <- R6Class(
           apply_stack[[length(apply_stack)]][[length(apply_stack[[length(apply_stack)]]) + 1]] <- self$program[[node]]
         }
         function_arity <- self$function_set[[apply_stack[[length(apply_stack)]][[1]]]]$arity
+        function_param <- self$function_set[[apply_stack[[length(apply_stack)]][[1]]]]$param
         while (length(apply_stack[[length(apply_stack)]]) == function_arity + 1) {
           my_function <- apply_stack[[length(apply_stack)]][[1]]
           terminals <- list()
           # calculate terminals
           for (i in 2:length(apply_stack[[length(apply_stack)]])) {
-            if (length(apply_stack[[length(apply_stack)]][[i]]) == 1 && is.numeric(apply_stack[[length(apply_stack)]][[i]])) {
+            if (length(apply_stack[[length(apply_stack)]][[i]]) == 1 && is.numeric(apply_stack[[length(apply_stack)]][[i]]) && i <= (function_arity - function_param + 1)) {
               terminals[[i - 1]] <- rep(apply_stack[[length(apply_stack)]][[i]], dim(X)[1])
             } else if (length(apply_stack[[length(apply_stack)]][[i]]) == 1 && apply_stack[[length(apply_stack)]][[i]] %in% self$feature_names) {
               terminals[[i - 1]] <- X[[apply_stack[[length(apply_stack)]][[i]]]]
             } else {
-              terminals[[i - 1]] <- apply_stack[[length(apply_stack)]][[i]]
+              terminals[[i - 1]] <- as.numeric(apply_stack[[length(apply_stack)]][[i]])
             }
           }
           # apply terminals to function
@@ -221,7 +222,9 @@ Program <- R6Class(
       for (i in 1:length(program)) {
         if (program[[i]] %in% names(self$function_set)) {
           probs[i] <- 0.9
-        } else {
+        } else if(is.character(program[[i]])){
+          probs[i] <- 0
+        }else{
           probs[i] <- 0.1
         }
       }
@@ -299,7 +302,9 @@ Program <- R6Class(
           }
           program[[i]] <- sample(sample_pool, size = 1)
         } else {
-          if (!is.null(self$const_range)) {
+          if (is.character(node)){
+            terminal <- node
+          }else if(!is.null(self$const_range)) {
             terminal <- sample(c(self$feature_names, "const"), size = 1)
             if (terminal == "const") {
               terminal <- runif(1, min = min(self$const_range), max = max(self$const_range))
@@ -313,56 +318,45 @@ Program <- R6Class(
       return(program)
     },
     #' @description
-    #' Decode the prefix expression of program as list of tree.
-    #' @param tokens The program.
-    #'
-    #' @return The standard tree representation of the program.
-    decode_prefix_expression = function(tokens) {
-      helper <- function(index) {
-        if (index > length(tokens)) {
-          stop("Invalid expression: tokens exhausted")
-        }
-        token <- tokens[[index]]
-        if (is.numeric(token) | token %in% self$feature_names) {
-          return(list(node = list(value = token, left = NULL, right = NULL), next_index = index + 1))
-        } else {
-          if (self$function_set[[token]]$arity == 1) {
-            left_node <- helper(index + 1)
-            return(list(node = list(value = token, left = left_node$node, right = NULL), next_index = left_node$next_index))
-          } else {
-            left_node <- helper(index + 1)
-            right_node <- helper(left_node$next_index)
-            return(list(node = list(value = token, left = left_node$node, right = right_node$node), next_index = right_node$next_index))
-          }
-        }
-      }
-      tree <- helper(1)$node
-      return(tree)
-    },
-    #' @description
     #' Generate the readable tree expression of program
     #' @return The characters of a tree.
     tree_expression = function() {
-      helper <- function(tokens) {
-        if (is.numeric(tokens$value) | tokens$value %in% self$feature_names) {
-          if (is.numeric(tokens$value)) {
-            return(round(tokens$value, 3))
-          } else {
-            return(tokens$value)
-          }
+      node <- self$program[[1]]
+      # Check for single-node programs
+      if (is.numeric(node)) {
+        return(node)
+      }
+      if (node %in% self$feature_names) {
+        return(node)
+      }
+      apply_stack <- list()
+      for (node in 1:length(self$program)) {
+        # Apply functions that have sufficient arguments
+        if (self$program[[node]] %in% names(self$function_set)) {
+          apply_stack[[length(apply_stack) + 1]] <- list(self$program[[node]])
         } else {
-          if (self$function_set[[tokens$value]]$arity == 1) {
-            left_node <- helper(tokens$left)
-            return(paste(tokens$value, "(", left_node, ")", sep = ""))
+          apply_stack[[length(apply_stack)]][[length(apply_stack[[length(apply_stack)]]) + 1]] <- self$program[[node]]
+        }
+        function_arity <- self$function_set[[apply_stack[[length(apply_stack)]][[1]]]]$arity
+        function_param <- self$function_set[[apply_stack[[length(apply_stack)]][[1]]]]$param
+        while (length(apply_stack[[length(apply_stack)]]) == function_arity + 1) {
+          my_function <- apply_stack[[length(apply_stack)]][[1]]
+          terminals <- c()
+          # add terminals
+          for (i in 2:length(apply_stack[[length(apply_stack)]])) {
+            terminals <- c(terminals, as.character(apply_stack[[length(apply_stack)]][[i]]))
+          }
+          # add terminals to function
+          intermediate_result <- paste0(self$function_set[[my_function]]$name, "(", paste(terminals,collapse = ","),")",sep = "")
+          if (length(apply_stack) != 1) {
+            apply_stack <- apply_stack[1:(length(apply_stack) - 1)]
+            function_arity <- self$function_set[[apply_stack[[length(apply_stack)]][[1]]]]$arity
+            apply_stack[[length(apply_stack)]][[length(apply_stack[[length(apply_stack)]]) + 1]] <- intermediate_result
           } else {
-            left_node <- helper(tokens$left)
-            right_node <- helper(tokens$right)
-            return(paste(tokens$value, "(", left_node, ",", right_node, ")", sep = ""))
+            return(intermediate_result)
           }
         }
       }
-      tokens <- self$decode_prefix_expression(self$program)
-      return(helper(tokens))
     },
     #' @description
     #' Compute the depth of a tree.

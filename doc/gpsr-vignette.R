@@ -38,9 +38,11 @@ perf_sqr_plus = make_function(
   arity = 4, 
   name = "perfect_square_plus",
   param = 2,
-  param_pool = list(c(1,2,3),c(2,3,4)))
+  param_pool = list(c('1','2','3'),c('2','3','4')))
 # test the function
-perf_sqr_plus$fun(c(1,2,3),c(2,3,4),2,3)
+# note that the character param would be automatically 
+# transform to numeric in our algorithm
+perf_sqr_plus$fun(c(1,2,3),c(2,3,4),as.numeric('2'),as.numeric('3'))
 
 ## -----------------------------------------------------------------------------
 gpsr_es = SymbolicRegressor$new(function_set = list("add","sub","div","mul",perf_sqr,perf_sqr_plus))

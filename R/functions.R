@@ -20,10 +20,10 @@
 #'   name = "My first function",
 #'   arity = 3,
 #'   param = 2,
-#'   param_pool = list(c(1, 2, 3), c(4, 5, 6))
+#'   param_pool = list(c('1', '2', '3'), c('4', '5', '6'))
 #' )
 #' # check the function return the correct number
-#' my_customized_function$fun(5, 2, 3)
+#' my_customized_function$fun(5, as.numeric('2'), as.numeric('5'))
 make_function <- function(fun, arity, name, param = 0, param_pool = list()) {
   # Making a function for use in programs
   # Parameters ---------------------------------------------------------
@@ -36,7 +36,7 @@ make_function <- function(fun, arity, name, param = 0, param_pool = list()) {
   # param : numeric
   #   The number of arguments that the function takes and varied during the training.
   # param_pool : numeric
-  #   The possible values the param can take.
+  #   The possible values the param can take. character.
   # Returns ------------------------------------------------------------
   # function_list : list
   #   The list return includes the function itself and the attributes of it.
@@ -64,8 +64,13 @@ make_function <- function(fun, arity, name, param = 0, param_pool = list()) {
     stop(paste("The number of param pools is not consistent with the number of params. Got params:", param, "Got param pools:", length(param_pool)))
   }
   for (i in param_pool) {
-    if (!is.numeric(i)) {
-      stop(paste("The param pool expects numeric value. Got type:", class(i)))
+    if (!is.character(i)) {
+      stop(paste("The param pool expects character value. Got type:", class(i)))
+    }
+  }
+  for (i in param_pool) {
+    if (sum(is.na(as.numeric(i))) > 0) {
+      stop(paste("The param pool expects Non-NA numeric after transform the character value. Please check :", paste(i, collapse = "\n - "),sep = "\n - "))
     }
   }
   if (!is.character(name)) {
@@ -81,7 +86,7 @@ make_function <- function(fun, arity, name, param = 0, param_pool = list()) {
   }
   if (param > 0) {
     for (i in c(1:param)) {
-      sample_terminals[[length(sample_terminals) + 1]] <- sample(param_pool[[i]], size = 1)
+      sample_terminals[[length(sample_terminals) + 1]] <- as.numeric(sample(param_pool[[i]], size = 1))
     }
   }
   sample_intermediate_result <- do.call(fun, sample_terminals)
@@ -95,7 +100,7 @@ make_function <- function(fun, arity, name, param = 0, param_pool = list()) {
   }
   if (param > 0) {
     for (i in c(1:param)) {
-      sample_terminals[[length(sample_terminals) + 1]] <- sample(param_pool[[i]], size = 1)
+      sample_terminals[[length(sample_terminals) + 1]] <- as.numeric(sample(param_pool[[i]], size = 1))
     }
   }
   sample_intermediate_result <- do.call(fun, sample_terminals)
@@ -109,7 +114,7 @@ make_function <- function(fun, arity, name, param = 0, param_pool = list()) {
   }
   if (param > 0) {
     for (i in c(1:param)) {
-      sample_terminals[[length(sample_terminals) + 1]] <- sample(param_pool[[i]], size = 1)
+      sample_terminals[[length(sample_terminals) + 1]] <- as.numeric(sample(param_pool[[i]], size = 1))
     }
   }
   sample_intermediate_result <- do.call(fun, sample_terminals)

@@ -50,7 +50,6 @@ Initialize method}
 \item \href{#method-Program-subtree_mutation}{\code{Program$subtree_mutation()}}
 \item \href{#method-Program-hoist_mutation}{\code{Program$hoist_mutation()}}
 \item \href{#method-Program-point_mutation}{\code{Program$point_mutation()}}
-\item \href{#method-Program-decode_prefix_expression}{\code{Program$decode_prefix_expression()}}
 \item \href{#method-Program-tree_expression}{\code{Program$tree_expression()}}
 \item \href{#method-Program-depth}{\code{Program$depth()}}
 \item \href{#method-Program-clone}{\code{Program$clone()}}
@@ -248,26 +247,6 @@ Perform the point mutation operation on the program.
 
 \subsection{Returns}{
 The flattened tree representation of the program.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Program-decode_prefix_expression"></a>}}
-\if{latex}{\out{\hypertarget{method-Program-decode_prefix_expression}{}}}
-\subsection{Method \code{decode_prefix_expression()}}{
-Decode the prefix expression of program as list of tree.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Program$decode_prefix_expression(tokens)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{tokens}}{The program.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-The standard tree representation of the program.
 }
 }
 \if{html}{\out{<hr>}}
