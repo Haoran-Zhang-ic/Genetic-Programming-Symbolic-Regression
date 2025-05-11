@@ -71,9 +71,9 @@ paste("Best program:",sr$best_program$tree_expression())
 
 Our target formula is: $`y = X_1^2 - X_2^2 + X_1 - 1`$.
 
-The best expression we get is $`y = (X_1 - 0.974) - (X_2^2 - X_1^2)`$.
+The best expression we get is $`y = (X_1 - 0.98) - (X_2^2 - X_1^2)`$.
 
-After reform our expression $`y = X_1^2 - X_2^2 + X_1 - 0.974`$, we
+After reform our expression $`y = X_1^2 - X_2^2 + X_1 - 0.98`$, we
 (almost) find the formula we are looking for!
 
 Next, let’s try the changeable parameters!
